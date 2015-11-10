@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+
+# gracefully reload syslog-ng
+kill -HUP "$(cat /var/run/syslog-ng.pid)"
+
+exit 0
