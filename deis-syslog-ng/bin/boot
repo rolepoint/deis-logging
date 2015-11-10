@@ -86,7 +86,7 @@ if [[ ! -z $EXTERNAL_PORT ]]; then
 	set +e
 
 	# wait for the service to become available on PORT
-	sleep 1 && while [[ -z $(netstat -lnt | awk "\$6 == \"LISTEN\" && \$4 ~ \".$PORT\" && \$1 ~ \"$PROTO.?\"") ]] ; do sleep 1; done
+	sleep 1 && while [[ -z $(netstat -lnt | awk "\$6 == \"LISTEN\" && \$4 ~ \".$SYSLOG_PORT\" && \$1 ~ \"$PROTO.?\"") ]] ; do sleep 1; done
 
 	# while the port is listening, publish to etcd
 	while [[ ! -z $(netstat -lnt | awk "\$6 == \"LISTEN\" && \$4 ~ \".$PORT\" && \$1 ~ \"$PROTO.?\"") ]] ; do

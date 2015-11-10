@@ -5,7 +5,7 @@ uid=1000
 gid=1000
 mode="0640"
 keys=[
-  "/deis/log/syslog-ng",
+  "/deis/logs/syslog-ng",
 ]
 reload_cmd="/app/bin/reload"
 check_cmd="/usr/sbin/syslog-ng -f {{ .src }} --syntax-only"
