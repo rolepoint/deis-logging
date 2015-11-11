@@ -34,6 +34,10 @@ This should forward any messages coming from the docker container named
 "my-app" to logentries, with the token "123456" followed by the actual message
 contents itself.
 
+Note: deis-syslog-ng automatically appends a newline to the message template
+(because logentries didn't accept logs without it), so your template should not
+include a new line.
+
 ### logspout-etcd
 
 logspout-etcd is a custom-build of logspout, that will fetch the host & port of
