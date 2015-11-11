@@ -14,10 +14,18 @@ import (
 
 func init() {
 	src := &EtcdSource{
-		hostkey: os.Getenv("LOGGER_HOST_KEY"),
-		portkey: os.Getenv("LOGGER_PORT_KEY"),
+		hostkey: getopt("LOGGER_HOST_KEY", "/deis/logs/host"),
+		portkey: getopt("LOGGER_PORT_KEY", "/deis/logs/port"),
 	}
 	router.Jobs.Register(src, "etcsrc")
+}
+
+func getopt(name, dfault string) string {
+    value := os.Getenv(name)
+    if value == "" {
+        value = dfault
+    }
+    return value
 }
 
 type EtcdSource struct {
