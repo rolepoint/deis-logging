@@ -1,0 +1,11 @@
+[template]
+src="syslog-ng.conf"
+dest="/etc/syslog-ng/syslog-ng.conf"
+uid=1000
+gid=1000
+mode="0640"
+keys=[
+  "/deis/logs/syslog-ng",
+]
+reload_cmd="/app/bin/reload"
+check_cmd="/usr/sbin/syslog-ng -f {{ .src }} --syntax-only"

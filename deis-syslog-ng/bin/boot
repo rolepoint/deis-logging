@@ -1,0 +1,79 @@
+#!/usr/bin/env bash
+#
+# This script is designed to be run inside the container
+#
+
+# fail hard and fast even on pipelines
+set -eo pipefail
+
+# set debug based on envvar
+[[ $DEBUG ]] && set -x
+
+if [[ $DEBUG ]] ; then
+  EXTRA_SYSLOG_NG_ARGS="-Fevd"
+else
+  EXTRA_SYSLOG_NG_ARGS="-F"
+fi
+
+# configure etcd
+export ETCD_PORT=${ETCD_PORT:-4001}
+export ETCD="$HOST:$ETCD_PORT"
+export ETCD_PATH=${ETCD_PATH:-/deis/logs}
+export ETCD_TTL=${ETCD_TTL:-20}
+
+# wait for etcd to be available
+until etcdctl --no-sync -C "$ETCD" ls >/dev/null 2>&1; do
+	echo "waiting for etcd at $ETCD..."
+	sleep $((ETCD_TTL/2))  # sleep for half the TTL
+done
+
+# wait until etcd has discarded potentially stale values
+sleep $((ETCD_TTL+1))
+
+function etcd_safe_mkdir {
+	set +e
+	ERROR="$(etcdctl --no-sync -C "$ETCD" mkdir "$1" 2>&1 >/dev/null)"
+
+	if [[ $? -ne 0 ]] && echo "$ERROR" | grep -iqve "key already exists"; then
+		echo "etcd_safe_mkdir: an etcd error occurred ($ERROR)"
+		echo "aborting..."
+		exit 1
+	fi
+	set -e
+}
+
+# safely create required keyspaces
+etcd_safe_mkdir /deis/logs/syslog-ng
+
+mkdir -p /etc/syslog-ng
+
+# wait for confd to run once and install initial templates
+until confd -onetime -node "$ETCD" --confdir /app --log-level error; do
+	echo "deis-syslog-ng: waiting for confd to write initial templates..."
+	sleep $((ETCD_TTL/2))  # sleep for half the TTL
+done
+
+cd /app
+
+mkdir -p /data/logs
+chmod 777 /data/logs
+
+# spawn a gunicorn server in the background
+/usr/sbin/syslog-ng $EXTRA_SYSLOG_NG_ARGS -f /etc/syslog-ng/syslog-ng.conf -p /var/run/syslog-ng.pid &
+
+# Forward sigterm to syslog-ng
+function on_exit() {
+	SYSLOG_NG_PID=$(cat /var/run/syslog-ng.pid)
+  echo "Killing syslog-ng: $SYSLOG_NG_PID"
+	kill -TERM "$SYSLOG_NG_PID" 2>/dev/null
+	wait "$SYSLOG_NG_PID" 2>/dev/null
+	exit 0
+}
+trap on_exit TERM
+
+# spawn confd in the background to update services based on etcd changes
+confd -node "$ETCD" --confdir /app --log-level error --interval 5 &
+
+echo deis-syslog-ng running...
+
+wait
