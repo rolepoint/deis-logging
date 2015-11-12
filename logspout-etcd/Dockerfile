@@ -1,1 +1,1 @@
-FROM gliderlabs/logspout:master
+FROM rolepoint/logspout:99b8b0a6
