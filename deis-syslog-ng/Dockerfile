@@ -1,4 +1,4 @@
-FROM gliderlabs/alpine:3.2
+FROM gliderlabs/alpine:edge
 
 RUN apk-install syslog-ng curl bash sudo
 
@@ -14,3 +14,4 @@ CMD ["/app/bin/boot"]
 EXPOSE 514/tcp 514/udp
 
 ADD . /app
+RUN mv /app/ca /etc/syslog-ng/ca
