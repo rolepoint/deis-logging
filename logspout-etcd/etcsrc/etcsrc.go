@@ -90,7 +90,6 @@ func (p *EtcdSource) Run() error {
 		if err != nil {
 			return err
 		}
-		log.Print("Etcd watcher returned.  Re-checking route.")
 		route, err = p.processroute(route)
 		if err != nil {
 			return err
@@ -118,7 +117,6 @@ func (p *EtcdSource) processroute(current *router.Route) (*router.Route, error) 
 		Adapter: "syslog",
 	}
 	if current != nil && new.Address == current.Address {
-		log.Print("No address changes")
 		return current, nil
 	}
 	log.Print("Address has changed.  Adding old & removing new route.")
