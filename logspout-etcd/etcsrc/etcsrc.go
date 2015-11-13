@@ -76,7 +76,7 @@ func (p *EtcdSource) Run() error {
 			if etcdErr.Code != client.ErrorCodeKeyNotFound {
 				return err
 			}
-			// Sleep for 5 secodns if the keys aren't there, then try again.
+			// Sleep for 5 seconds if the keys aren't there, then try again.
 			log.Printf("Keys %v and %v not found.  Sleeping", p.hostkey, p.portkey)
 			time.Sleep(5000 * time.Millisecond)
 		} else {
