@@ -73,13 +73,12 @@ func (p *EtcdSource) Run() error {
 			if !isEtcdErr {
 				return err
 			}
-			// Error code of 100 means keys are not there.  We should
-			// wait for them if this is the case.
 			if etcdErr.Code != client.ErrorCodeKeyNotFound {
 				return err
 			}
+			// Sleep for 5 seconds if the keys aren't there, then try again.
 			log.Printf("Keys %v and %v not found.  Sleeping", p.hostkey, p.portkey)
-			time.Sleep(500 * time.Millisecond)
+			time.Sleep(5000 * time.Millisecond)
 		} else {
 			keysThere = true
 		}

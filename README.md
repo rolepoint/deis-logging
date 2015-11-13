@@ -50,3 +50,35 @@ The main reason for this replacement is to get rid of the hardcoding of the
 log-format that deis-logspout uses.  Using the standard syslog format makes it
 much easier to write custom filtering etc. in deis-syslog-ng rather than trying
 to parse the custom log format of deis-logspout.
+
+
+## Setup
+
+Using logspout-etcd requires replacing some components of deis:
+
+#### deis-logger
+
+Deis logger needs to be replaced with deis-syslog-ng:
+
+    deisctl config logger set image=rolepoint/deis-syslog-ng
+    fleetctl destroy deis-logger
+    fleetctl submit units/deis-logger
+    fleetctl start deis-logger
+    fleetctl submit units/announce-syslog.service
+    fleetctl start announce-syslog.service
+
+This will setup deis-logger to use a different docker image and restart
+deis-logger with a few adjustments to the fleetctl service.  It also loads in
+the announce-syslog.service, which publishes IP & port details of the new
+deis-logger.
+
+#### deis-logspout
+
+Deis logspout needs to be replaced with logspout-etcd:
+
+    deisctl config logger set image=rolepoint/logspout-etcd
+    fleetctl stop deis-logspout
+    fleetctl start deis-logspout
+
+This is simpler, because we do not need to announce the service and do not
+need to make any customizations to the deis-logspout unit definition.
