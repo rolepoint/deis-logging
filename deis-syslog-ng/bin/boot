@@ -12,7 +12,7 @@ set -eo pipefail
 if [[ $DEBUG ]] ; then
   EXTRA_SYSLOG_NG_ARGS="-Fevd"
 else
-  EXTRA_SYSLOG_NG_ARGS="-F"
+  EXTRA_SYSLOG_NG_ARGS=""
 fi
 
 # configure etcd
@@ -58,7 +58,7 @@ cd /app
 mkdir -p /data/logs
 chmod 777 /data/logs
 
-# spawn a gunicorn server in the background
+# spawn a syslog-ng server in the background
 /usr/sbin/syslog-ng $EXTRA_SYSLOG_NG_ARGS -f /etc/syslog-ng/syslog-ng.conf -p /var/run/syslog-ng.pid &
 
 # Forward sigterm to syslog-ng
@@ -82,7 +82,7 @@ if [[ ! -z $EXTERNAL_PORT ]]; then
 	    sleep 1
 	done
     echo publishing deis-syslog-ng to etcd
-    while [ `ps -o pid | grep $(cat /var/run/syslog-ng.pid)` ] ; do
+    while [[ -n `ps -o pid | grep $(cat /var/run/syslog-ng.pid)` ]] ; do
         etcdctl -C "$ETCD" set /new/logs/host $HOST --ttl $ETCD_TTL > /dev/null 2>&1
         etcdctl -C "$ETCD" set /new/logs/port $EXTERNAL_PORT --ttl $ETCD_TTL > /dev/null 2>&1
         sleep $((ETCD_TTL/2))
