@@ -78,3 +78,5 @@ Deis logspout needs to be replaced with logspout-etcd:
 
 This is simpler, because we do not need to make any customizations to the
 deis-logspout unit definition.
+
+BULLSHIT
