@@ -72,7 +72,7 @@ deis-logger with a few adjustments to the fleetctl service.
 
 Deis logspout needs to be replaced with logspout-etcd:
 
-    deisctl config logger set image=rolepoint/logspout-etcd
+    deisctl config logspout set image=rolepoint/logspout-etcd
     fleetctl stop deis-logspout
     fleetctl start deis-logspout
 
