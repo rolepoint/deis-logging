@@ -83,8 +83,8 @@ if [[ ! -z $EXTERNAL_PORT ]]; then
 	done
     echo publishing deis-syslog-ng to etcd
     while [[ -n `ps -o pid | grep $(cat /var/run/syslog-ng.pid)` ]] ; do
-        etcdctl -C "$ETCD" set /new/logs/host $HOST --ttl $ETCD_TTL > /dev/null 2>&1
-        etcdctl -C "$ETCD" set /new/logs/port $EXTERNAL_PORT --ttl $ETCD_TTL > /dev/null 2>&1
+        etcdctl -C "$ETCD" set /deis/logs/host $HOST --ttl $ETCD_TTL > /dev/null 2>&1
+        etcdctl -C "$ETCD" set /deis/logs/port $EXTERNAL_PORT --ttl $ETCD_TTL > /dev/null 2>&1
         sleep $((ETCD_TTL/2))
     done
     echo syslog-ng no longer running
